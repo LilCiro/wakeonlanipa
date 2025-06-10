@@ -34,17 +34,18 @@ jobs:
           path: theos/sdks
 
       - name: Temel Araçları Yükle (ldid, make, xz vb.)
-        uses: dhinakg/procursus-action@v1.5
+        # Bu SHA, senin verdiğin ekran görüntüsündeki en son commit'e aittir.
+        uses: dhinakg/procursus-action@4526d5e0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6
         with:
           packages: coreutils make xz ldid dpkg
 
       - name: Theos Projesini Derle
         run: |
           export THEOS=theos
-          # cd WakeOnLanApp # BURAYI KENDİ PROJE KLASÖRÜ ADINIZLA DEĞİŞTİRİN!
-          # Eğer projeniz GitHub repo'sunun kökündeyse bu satıra gerek yok.
-          # Eğer projeniz repo'nun içinde 'WakeOnLanApp' adında bir alt klasördeyse,
-          # yukarıdaki satırı yorumdan çıkarın ve 'WakeOnLanApp' yerine doğru klasör adını yazın.
+          # Aşağıdaki satırı, eğer Theos projen repo'nun ana dizininde DEĞİLSE
+          # ve 'WakeOnLanApp' adında bir alt klasördeyse kullan.
+          # Eğer projen doğrudan repo'nun kökündeyse bu satırı sil veya yorumda bırak.
+          cd WakeOnLanApp # <<< BURAYI KENDİ PROJE KLASÖRÜ ADINIZLA DEĞİŞTİRİN!
 
           gmake package FINALPACKAGE=1 STRIP=0
         shell: bash
@@ -52,10 +53,10 @@ jobs:
       - name: IPA Dosyasını .deb Paketinden Çıkar
         run: |
           export THEOS=theos
-          # cd WakeOnLanApp # BURAYI KENDİ PROJE KLASÖRÜ ADINIZLA DEĞİŞTİRİN!
-          # Eğer projeniz GitHub repo'sunun kökündeyse bu satıra gerek yok.
-          # Eğer projeniz repo'nun içinde 'WakeOnLanApp' adında bir alt klasördeyse,
-          # yukarıdaki satırı yorumdan çıkarın ve 'WakeOnLanApp' yerine doğru klasör adını yazın.
+          # Aşağıdaki satırı, eğer Theos projen repo'nun ana dizininde DEĞİLSE
+          # ve 'WakeOnLanApp' adında bir alt klasördeyse kullan.
+          # Eğer projen doğrudan repo'nun kökündeyse bu satırı sil veya yorumda bırak.
+          cd WakeOnLanApp # <<< BURAYI KENDİ PROJE KLASÖRÜ ADINIZLA DEĞİŞTİRİN!
 
           DEB_FILE=$(find packages -name "*.deb" | head -n 1)
 
