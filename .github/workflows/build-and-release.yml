@@ -43,17 +43,30 @@ jobs:
           brew install dpkg
         shell: bash
 
+      - name: HATA AYIKLAMA: Theos Klasör İçeriğini Kontrol Et
+        run: |
+          echo "Theos klasörü içeriği (theos/):"
+          ls -laR theos/
+          echo "Theos makefiles klasörü içeriği (theos/makefiles/):"
+          ls -la theos/makefiles/
+        shell: bash
+
+      - name: HATA AYIKLAMA: Proje Makefile İçeriğini Kontrol Et
+        run: |
+          echo "Projenizin Makefile içeriği:"
+          # Eğer Makefile deponun kökünde değilse, buradaki yolu doğru şekilde ayarlamanız gerekebilir.
+          # Örneğin, Makefile WakeOnLanApp/Makefile altındaysa: "cat WakeOnLanApp/Makefile"
+          cat Makefile
+        shell: bash
+
       - name: Theos Projesini Derle
         run: |
-          # THEOS değişkenini, deponun kök dizinindeki "theos" klasörüne mutlak yol olarak ayarla.
-          # Bu, Theos dosyalarını her zaman doğru bulmasını sağlar.
           export THEOS="$(pwd)/theos"
           gmake package FINALPACKAGE=1 STRIP=0
         shell: bash
 
       - name: IPA Dosyasını .deb Paketinden Çıkar
         run: |
-          # IPA çıkarma adımı için de THEOS değişkenini mutlak yol olarak ayarla.
           export THEOS="$(pwd)/theos"
           
           DEB_FILE=$(find packages -name "*.deb" | head -n 1)
