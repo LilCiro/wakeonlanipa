@@ -33,30 +33,40 @@ jobs:
           ref: master
           path: theos/sdks
 
-      - name: Temel Araçları Yükle (ldid, make, xz vb.)
-        # Bu SHA, senin verdiğin ekran görüntüsündeki en son commit'e aittir.
-        uses: dhinakg/procursus-action@4526d5e0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6
-        with:
-          packages: coreutils make xz ldid dpkg
+      - name: Gerekli Araçları Homebrew ile Yükle (ldid, make, xz, dpkg)
+        run: |
+          brew update
+          brew install coreutils
+          brew install make
+          brew install xz
+          brew install ldid
+          brew install dpkg
+        shell: bash
 
       - name: Theos Projesini Derle
         run: |
           export THEOS=theos
-          # Aşağıdaki satırı, eğer Theos projen repo'nun ana dizininde DEĞİLSE
-          # ve 'WakeOnLanApp' adında bir alt klasördeyse kullan.
-          # Eğer projen doğrudan repo'nun kökündeyse bu satırı sil veya yorumda bırak.
-          cd WakeOnLanApp # <<< BURAYI KENDİ PROJE KLASÖRÜ ADINIZLA DEĞİŞTİRİN!
-
+          
+          # DİKKAT: Projenizin konumu için aşağıdaki satırı ayarlayın!
+          # EĞER "Makefile", "main.m" gibi dosyalar doğrudan "wakeonlanipa" deponuzun ana klasöründeyse,
+          # aşağıdaki "cd wakeonlanipa" satırını SİLİN veya YORUM SATIRI YAPIN (# koyarak).
+          # EĞER bu dosyalar deponun içinde "WakeOnLanApp" veya "myApp" gibi bir alt klasördeyse,
+          # aşağıdaki "cd" komutunu o ALT KLASÖRÜN ADIYLA GÜNCELLEYİN.
+          # Örnek: "cd WakeOnLanApp" veya "cd myApp"
+          # Eğer projeniz doğrudan depoda ise, bu satıra ihtiyacınız yoktur.
+          # cd <BURAYA_PROJE_KLASÖRÜ_ADINIZI_YAZIN_VEYA_SİLİN>
+          
           gmake package FINALPACKAGE=1 STRIP=0
         shell: bash
 
       - name: IPA Dosyasını .deb Paketinden Çıkar
         run: |
           export THEOS=theos
-          # Aşağıdaki satırı, eğer Theos projen repo'nun ana dizininde DEĞİLSE
-          # ve 'WakeOnLanApp' adında bir alt klasördeyse kullan.
-          # Eğer projen doğrudan repo'nun kökündeyse bu satırı sil veya yorumda bırak.
-          cd WakeOnLanApp # <<< BURAYI KENDİ PROJE KLASÖRÜ ADINIZLA DEĞİŞTİRİN!
+          
+          # DİKKAT: Projenizin konumu için aşağıdaki satırı ayarlayın!
+          # Üstteki "Theos Projesini Derle" adımındaki ayarınızla AYNI olmalı.
+          # Eğer üstte "cd" komutunu sildiyseniz, burada da silin.
+          # cd <BURAYA_PROJE_KLASÖRÜ_ADINIZI_YAZIN_VEYA_SİLİN>
 
           DEB_FILE=$(find packages -name "*.deb" | head -n 1)
 
@@ -83,14 +93,14 @@ jobs:
           mkdir -p final_ipa/Payload
           mv "$APP_BUNDLE_PATH" final_ipa/Payload/
 
-          zip -r "../WakeOnLanApp-${{ github.sha }}.ipa" final_ipa/*
+          zip -r "../wakeonlanipa-${{ github.sha }}.ipa" final_ipa/* # IPA dosyasının adını depo adınla eşleştirdim
 
-          echo "IPA dosyası oluşturuldu: WakeOnLanApp-${{ github.sha }}.ipa"
+          echo "IPA dosyası oluşturuldu: wakeonlanipa-${{ github.sha }}.ipa"
         shell: bash
 
       - name: Derlenmiş IPA'yı Yayınla (Artifact Olarak Yükle)
         uses: actions/upload-artifact@v4
         with:
-          name: WakeOnLanApp-IPA
-          path: WakeOnLanApp-${{ github.sha }}.ipa
+          name: wakeonlanipa-IPA
+          path: wakeonlanipa-${{ github.sha }}.ipa # IPA dosyasının adını depo adınla eşleştirdim
           retention-days: 7
