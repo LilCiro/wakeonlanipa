@@ -45,15 +45,16 @@ jobs:
 
       - name: Theos Projesini Derle
         run: |
-          # Theos ana dizinden çalıştırıldığı için ek "cd" komutuna gerek yok.
-          export THEOS=theos
+          # THEOS değişkenini, deponun kök dizinindeki "theos" klasörüne mutlak yol olarak ayarla.
+          # Bu, Theos dosyalarını her zaman doğru bulmasını sağlar.
+          export THEOS="$(pwd)/theos"
           gmake package FINALPACKAGE=1 STRIP=0
         shell: bash
 
       - name: IPA Dosyasını .deb Paketinden Çıkar
         run: |
-          # Theos ana dizinden çalıştırıldığı için ek "cd" komutuna gerek yok.
-          export THEOS=theos
+          # IPA çıkarma adımı için de THEOS değişkenini mutlak yol olarak ayarla.
+          export THEOS="$(pwd)/theos"
           
           DEB_FILE=$(find packages -name "*.deb" | head -n 1)
 
@@ -80,7 +81,7 @@ jobs:
           mkdir -p final_ipa/Payload
           mv "$APP_BUNDLE_PATH" final_ipa/Payload/
 
-          zip -r "wakeonlanipa-${{ github.sha }}.ipa" final_ipa/* # IPA dosyasının adını depo adınla eşleştirdim
+          zip -r "wakeonlanipa-${{ github.sha }}.ipa" final_ipa/*
 
           echo "IPA dosyası oluşturuldu: wakeonlanipa-${{ github.sha }}.ipa"
         shell: bash
