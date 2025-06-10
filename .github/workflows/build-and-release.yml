@@ -45,20 +45,15 @@ jobs:
 
       - name: Theos Projesini Derle
         run: |
-          # Proje klasörüne git
-          cd WakeOnLanApp
-          # THEOS değişkenini, Theos kurulumunun doğru yolunu gösterecek şekilde ayarla.
-          # "WakeOnLanApp" klasöründen bir üst dizindeki "theos" klasörünü işaret eder.
-          export THEOS=../theos 
+          # Theos ana dizinden çalıştırıldığı için ek "cd" komutuna gerek yok.
+          export THEOS=theos
           gmake package FINALPACKAGE=1 STRIP=0
         shell: bash
 
       - name: IPA Dosyasını .deb Paketinden Çıkar
         run: |
-          # Proje klasörüne git
-          cd WakeOnLanApp
-          # THEOS değişkenini, Theos kurulumunun doğru yolunu gösterecek şekilde ayarla.
-          export THEOS=../theos
+          # Theos ana dizinden çalıştırıldığı için ek "cd" komutuna gerek yok.
+          export THEOS=theos
           
           DEB_FILE=$(find packages -name "*.deb" | head -n 1)
 
@@ -85,7 +80,7 @@ jobs:
           mkdir -p final_ipa/Payload
           mv "$APP_BUNDLE_PATH" final_ipa/Payload/
 
-          zip -r "../wakeonlanipa-${{ github.sha }}.ipa" final_ipa/*
+          zip -r "wakeonlanipa-${{ github.sha }}.ipa" final_ipa/* # IPA dosyasının adını depo adınla eşleştirdim
 
           echo "IPA dosyası oluşturuldu: wakeonlanipa-${{ github.sha }}.ipa"
         shell: bash
