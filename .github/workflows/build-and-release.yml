@@ -54,8 +54,6 @@ jobs:
       - name: HATA AYIKLAMA: Proje Makefile İçeriğini Kontrol Et
         run: |
           echo "Projenizin Makefile içeriği:"
-          # Eğer Makefile deponun kökünde değilse, buradaki yolu doğru şekilde ayarlamanız gerekebilir.
-          # Örneğin, Makefile WakeOnLanApp/Makefile altındaysa: "cat WakeOnLanApp/Makefile"
           cat Makefile
         shell: bash
 
