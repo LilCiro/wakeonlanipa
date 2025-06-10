@@ -43,7 +43,7 @@ jobs:
           brew install dpkg
         shell: bash
 
-      - name: HATA AYIKLAMA:Theos Klasör İçeriğini Kontrol Et
+      - name: HATA AYIKLAMA: Theos Klasör İçeriğini Kontrol Et
         run: |
           echo "Theos klasörü içeriği (theos/):"
           ls -laR theos/
@@ -51,22 +51,30 @@ jobs:
           ls -la theos/makefiles/
         shell: bash
 
-      - name: HATA AYIKLAMA:Proje Makefile İçeriğini Kontrol Et
+      - name: HATA AYIKLAMA: Proje Makefile İçeriğini Kontrol Et
         run: |
           echo "Projenizin Makefile içeriği:"
+          # Bu satır, Makefile'ınızın deponun kökünde olduğunu varsayar.
+          # Eğer Makefile, 'WakeOnLanApp' gibi bir alt klasördeyse, yolu güncelleyin.
           cat Makefile
         shell: bash
 
       - name: Theos Projesini Derle
         run: |
           export THEOS="$(pwd)/theos"
+          # Eğer Theos proje dosyalarınız (Makefile, main.m vb.) deponun kökünde değilse,
+          # örneğin 'WakeOnLanApp' klasörünün içindeyse, aşağıdaki satırın yorumunu kaldırın:
+          # cd WakeOnLanApp 
           gmake package FINALPACKAGE=1 STRIP=0
         shell: bash
 
       - name: IPA Dosyasını .deb Paketinden Çıkar
         run: |
           export THEOS="$(pwd)/theos"
-
+          # Eğer Theos proje dosyalarınız deponun kökünde değilse,
+          # örneğin 'WakeOnLanApp' klasörünün içindeyse, aşağıdaki satırın yorumunu kaldırın:
+          # cd WakeOnLanApp
+          
           DEB_FILE=$(find packages -name "*.deb" | head -n 1)
 
           if [ -z "$DEB_FILE" ]; then
