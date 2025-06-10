@@ -45,29 +45,21 @@ jobs:
 
       - name: Theos Projesini Derle
         run: |
-          export THEOS=theos
-          
-          # DİKKAT: Projenizin konumu için aşağıdaki satırı ayarlayın!
-          # EĞER "Makefile", "main.m" gibi dosyalar doğrudan "wakeonlanipa" deponuzun ana klasöründeyse,
-          # aşağıdaki "cd wakeonlanipa" satırını SİLİN veya YORUM SATIRI YAPIN (# koyarak).
-          # EĞER bu dosyalar deponun içinde "WakeOnLanApp" veya "myApp" gibi bir alt klasördeyse,
-          # aşağıdaki "cd" komutunu o ALT KLASÖRÜN ADIYLA GÜNCELLEYİN.
-          # Örnek: "cd WakeOnLanApp" veya "cd myApp"
-          # Eğer projeniz doğrudan depoda ise, bu satıra ihtiyacınız yoktur.
-          # cd <BURAYA_PROJE_KLASÖRÜ_ADINIZI_YAZIN_VEYA_SİLİN>
-          
+          # Proje klasörüne git
+          cd WakeOnLanApp
+          # THEOS değişkenini, Theos kurulumunun doğru yolunu gösterecek şekilde ayarla.
+          # "WakeOnLanApp" klasöründen bir üst dizindeki "theos" klasörünü işaret eder.
+          export THEOS=../theos 
           gmake package FINALPACKAGE=1 STRIP=0
         shell: bash
 
       - name: IPA Dosyasını .deb Paketinden Çıkar
         run: |
-          export THEOS=theos
+          # Proje klasörüne git
+          cd WakeOnLanApp
+          # THEOS değişkenini, Theos kurulumunun doğru yolunu gösterecek şekilde ayarla.
+          export THEOS=../theos
           
-          # DİKKAT: Projenizin konumu için aşağıdaki satırı ayarlayın!
-          # Üstteki "Theos Projesini Derle" adımındaki ayarınızla AYNI olmalı.
-          # Eğer üstte "cd" komutunu sildiyseniz, burada da silin.
-          # cd <BURAYA_PROJE_KLASÖRÜ_ADINIZI_YAZIN_VEYA_SİLİN>
-
           DEB_FILE=$(find packages -name "*.deb" | head -n 1)
 
           if [ -z "$DEB_FILE" ]; then
@@ -93,7 +85,7 @@ jobs:
           mkdir -p final_ipa/Payload
           mv "$APP_BUNDLE_PATH" final_ipa/Payload/
 
-          zip -r "../wakeonlanipa-${{ github.sha }}.ipa" final_ipa/* # IPA dosyasının adını depo adınla eşleştirdim
+          zip -r "../wakeonlanipa-${{ github.sha }}.ipa" final_ipa/*
 
           echo "IPA dosyası oluşturuldu: wakeonlanipa-${{ github.sha }}.ipa"
         shell: bash
@@ -102,5 +94,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wakeonlanipa-IPA
-          path: wakeonlanipa-${{ github.sha }}.ipa # IPA dosyasının adını depo adınla eşleştirdim
+          path: wakeonlanipa-${{ github.sha }}.ipa
           retention-days: 7
