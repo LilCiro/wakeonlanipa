@@ -34,7 +34,7 @@ jobs:
           path: theos/sdks
 
       - name: Temel Araçları Yükle (ldid, make, xz vb.)
-        uses: dhinakg/procursus-action@v1.4
+        uses: dhinakg/procursus-action@v1.5
         with:
           packages: coreutils make xz ldid dpkg
 
