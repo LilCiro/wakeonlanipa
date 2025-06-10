@@ -5,6 +5,7 @@ WakeOnLan_FILES = main.m AppDelegate.m WOLDevice.m DeviceListViewController.m De
 WakeOnLan_FRAMEWORKS = UIKit Foundation CoreGraphics
 WakeOnLan_LIBRARIES = network
 WakeOnLan_ARCHS = arm64 armv7
+
 include $(THEOS_MAKE_FILES)/application.mk
 
 after-install::
