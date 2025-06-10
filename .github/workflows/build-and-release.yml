@@ -1,0 +1,95 @@
+name: WakeOnLan iOS Uygulama Derlemesi ve IPA Yayınlaması
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Uygulama Derlemesi
+    runs-on: macos-latest
+
+    steps:
+      - name: Depoyu Çek (Ana Proje Kodu)
+        uses: actions/checkout@v4
+
+      - name: Theos Repository'yi Çek
+        uses: actions/checkout@v4
+        with:
+          repository: theos/theos
+          ref: master
+          submodules: recursive
+          path: theos
+
+      - name: Theos SDK'larını Çek
+        uses: actions/checkout@v4
+        with:
+          repository: theos/sdks
+          ref: master
+          path: theos/sdks
+
+      - name: Temel Araçları Yükle (ldid, make, xz vb.)
+        uses: dhinakg/procursus-action@v1.4
+        with:
+          packages: coreutils make xz ldid dpkg
+
+      - name: Theos Projesini Derle
+        run: |
+          export THEOS=theos
+          # cd WakeOnLanApp # BURAYI KENDİ PROJE KLASÖRÜ ADINIZLA DEĞİŞTİRİN!
+          # Eğer projeniz GitHub repo'sunun kökündeyse bu satıra gerek yok.
+          # Eğer projeniz repo'nun içinde 'WakeOnLanApp' adında bir alt klasördeyse,
+          # yukarıdaki satırı yorumdan çıkarın ve 'WakeOnLanApp' yerine doğru klasör adını yazın.
+
+          gmake package FINALPACKAGE=1 STRIP=0
+        shell: bash
+
+      - name: IPA Dosyasını .deb Paketinden Çıkar
+        run: |
+          export THEOS=theos
+          # cd WakeOnLanApp # BURAYI KENDİ PROJE KLASÖRÜ ADINIZLA DEĞİŞTİRİN!
+          # Eğer projeniz GitHub repo'sunun kökündeyse bu satıra gerek yok.
+          # Eğer projeniz repo'nun içinde 'WakeOnLanApp' adında bir alt klasördeyse,
+          # yukarıdaki satırı yorumdan çıkarın ve 'WakeOnLanApp' yerine doğru klasör adını yazın.
+
+          DEB_FILE=$(find packages -name "*.deb" | head -n 1)
+
+          if [ -z "$DEB_FILE" ]; then
+            echo "Hata: .deb dosyası bulunamadı. Derleme başarısız olmuş olabilir."
+            exit 1
+          fi
+
+          echo "Bulunan .deb dosyası: $DEB_FILE"
+
+          mkdir -p temp_extract
+          ar x "$DEB_FILE" -C temp_extract
+          tar -xf temp_extract/data.tar.xz -C extracted_ipa
+
+          APP_BUNDLE_PATH=$(find extracted_ipa/Applications -type d -name "*.app" | head -n 1)
+
+          if [ -z "$APP_BUNDLE_PATH" ]; then
+            echo "Hata: .app bundle'ı extracted_ipa/Applications içinde bulunamadı."
+            exit 1
+          fi
+
+          echo "Bulunan .app bundle: $APP_BUNDLE_PATH"
+
+          mkdir -p final_ipa/Payload
+          mv "$APP_BUNDLE_PATH" final_ipa/Payload/
+
+          zip -r "../WakeOnLanApp-${{ github.sha }}.ipa" final_ipa/*
+
+          echo "IPA dosyası oluşturuldu: WakeOnLanApp-${{ github.sha }}.ipa"
+        shell: bash
+
+      - name: Derlenmiş IPA'yı Yayınla (Artifact Olarak Yükle)
+        uses: actions/upload-artifact@v4
+        with:
+          name: WakeOnLanApp-IPA
+          path: WakeOnLanApp-${{ github.sha }}.ipa
+          retention-days: 7
