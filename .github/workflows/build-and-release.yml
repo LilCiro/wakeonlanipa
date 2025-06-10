@@ -1,111 +1,49 @@
-name: WakeOnLan iOS Uygulama Derlemesi ve IPA Yayınlaması
+name: Build
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
   build:
-    name: Uygulama Derlemesi
+    name: Build
     runs-on: macos-latest
 
     steps:
-      - name: Depoyu Çek (Ana Proje Kodu)
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@main
 
-      - name: Theos Repository'yi Çek
-        uses: actions/checkout@v4
+      - name: Checkout theos/theos
+        uses: actions/checkout@main
         with:
           repository: theos/theos
-          ref: main # BURAYI DEĞİŞTİRDİK!
+          ref: master
           submodules: recursive
           path: theos
 
-      - name: Theos SDK'larını Çek
-        uses: actions/checkout@v4
+      - name: Checkout theos/sdks
+        uses: actions/checkout@main
         with:
           repository: theos/sdks
-          ref: main # BURAYI DEĞİŞTİRDİK!
+          ref: master
+          sparse-checkout: iPhoneOS16.5.sdk
           path: theos/sdks
 
-      - name: Gerekli Araçları Homebrew ile Yükle (ldid, make, xz, dpkg)
-        run: |
-          brew update
-          brew install coreutils
-          brew install make
-          brew install xz
-          brew install ldid
-          brew install dpkg
-        shell: bash
-
-      - name: HATA AYIKLAMA:Theos Klasör İçeriğini Kontrol Et
-        run: |
-          echo "Theos klasörü içeriği (theos/):"
-          ls -laR theos/
-          echo "Theos makefiles klasörü içeriği (theos/makefiles/):"
-          ls -la theos/makefiles/
-        shell: bash
-
-      - name: HATA AYIKLAMA:Proje Makefile İçeriğini Kontrol Et
-        run: |
-          echo "Projenizin Makefile içeriği:"
-          cat Makefile # Projenizin Makefile'ı deponun kökünde DEĞİLSE, yolu doğru ayarlayın.
-        shell: bash
-
-      - name: Theos Projesini Derle
-        run: |
-          export THEOS="$(pwd)/theos"
-          # Eğer Theos proje dosyalarınız (Makefile, main.m vb.) deponun kökünde değilse,
-          # örneğin 'WakeOnLanApp' gibi bir klasörün içindeyse, aşağıdaki satırın başındaki '#' işaretini kaldırın:
-          # cd WakeOnLanApp 
-          gmake package FINALPACKAGE=1 STRIP=0
-        shell: bash
-
-      - name: IPA Dosyasını .deb Paketinden Çıkar
-        run: |
-          export THEOS="$(pwd)/theos"
-          # Eğer Theos proje dosyalarınız deponun kökünde değilse,
-          # örneğin 'WakeOnLanApp' gibi bir klasörün içindeyse, aşağıdaki satırın başındaki '#' işaretini kaldırın:
-          # cd WakeOnLanApp
-          
-          DEB_FILE=$(find packages -name "*.deb" | head -n 1)
-
-          if [ -z "$DEB_FILE" ]; then
-            echo "Hata: .deb dosyası bulunamadı. Derleme başarısız olmuş olabilir."
-            exit 1
-          fi
-
-          echo "Bulunan .deb dosyası: $DEB_FILE"
-
-          mkdir -p temp_extract
-          ar x "$DEB_FILE" -C temp_extract
-          tar -xf temp_extract/data.tar.xz -C extracted_ipa
-
-          APP_BUNDLE_PATH=$(find extracted_ipa/Applications -type d -name "*.app" | head -n 1)
-
-          if [ -z "$APP_BUNDLE_PATH" ]; then
-            echo "Hata: .app bundle'ı extracted_ipa/Applications içinde bulunamadı."
-            exit 1
-          fi
-
-          echo "Bulunan .app bundle: $APP_BUNDLE_PATH"
-
-          mkdir -p final_ipa/Payload
-          mv "$APP_BUNDLE_PATH" final_ipa/Payload/
-
-          zip -r "wakeonlanipa-${{ github.sha }}.ipa" final_ipa/*
-
-          echo "IPA dosyası oluşturuldu: wakeonlanipa-${{ github.sha }}.ipa"
-        shell: bash
-
-      - name: Derlenmiş IPA'yı Yayınla (Artifact Olarak Yükle)
-        uses: actions/upload-artifact@v4
+      - name: Ensure main utils are installed
+        uses: dhinakg/procursus-action@main
         with:
-          name: wakeonlanipa-IPA
-          path: wakeonlanipa-${{ github.sha }}.ipa
-          retention-days: 7
+          packages: coreutils make xz ldid
+          
+      - name: Build
+        run: |
+          export THEOS=theos
+
+          git submodule update --init
+          bash get_libraries.sh
+          gmake package FINALPACKAGE=1 STRIP=0
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: artifact
+          path: packages/*.ipa
