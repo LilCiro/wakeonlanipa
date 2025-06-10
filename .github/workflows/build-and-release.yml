@@ -66,7 +66,7 @@ jobs:
       - name: IPA Dosyasını .deb Paketinden Çıkar
         run: |
           export THEOS="$(pwd)/theos"
-          
+
           DEB_FILE=$(find packages -name "*.deb" | head -n 1)
 
           if [ -z "$DEB_FILE" ]; then
@@ -102,4 +102,4 @@ jobs:
         with:
           name: wakeonlanipa-IPA
           path: wakeonlanipa-${{ github.sha }}.ipa
-          retention-days: 7  
+          retention-days: 7
