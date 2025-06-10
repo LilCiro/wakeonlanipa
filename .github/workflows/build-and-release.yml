@@ -43,7 +43,7 @@ jobs:
           brew install dpkg
         shell: bash
 
-      - name: HATA AYIKLAMA: Theos Klasör İçeriğini Kontrol Et
+      - name: HATA AYIKLAMA:Theos Klasör İçeriğini Kontrol Et
         run: |
           echo "Theos klasörü içeriği (theos/):"
           ls -laR theos/
@@ -51,63 +51,14 @@ jobs:
           ls -la theos/makefiles/
         shell: bash
 
-      - name: HATA AYIKLAMA: Proje Makefile İçeriğini Kontrol Et
+      - name: HATA AYIKLAMA:Proje Makefile İçeriğini Kontrol Et
         run: |
           echo "Projenizin Makefile içeriği:"
-          # Bu satır, Makefile'ınızın deponun kökünde olduğunu varsayar.
-          # Eğer Makefile, 'WakeOnLanApp' gibi bir alt klasördeyse, yolu güncelleyin.
+          # Projenizin Makefile'ı deponun kökünde DEĞİLSE, yolu doğru ayarlayın.
+          # Örneğin, 'WakeOnLanApp/Makefile' ise: 'cat WakeOnLanApp/Makefile'
           cat Makefile
         shell: bash
 
       - name: Theos Projesini Derle
         run: |
-          export THEOS="$(pwd)/theos"
-          # Eğer Theos proje dosyalarınız (Makefile, main.m vb.) deponun kökünde değilse,
-          # örneğin 'WakeOnLanApp' klasörünün içindeyse, aşağıdaki satırın yorumunu kaldırın:
-          # cd WakeOnLanApp 
-          gmake package FINALPACKAGE=1 STRIP=0
-        shell: bash
-
-      - name: IPA Dosyasını .deb Paketinden Çıkar
-        run: |
-          export THEOS="$(pwd)/theos"
-          # Eğer Theos proje dosyalarınız deponun kökünde değilse,
-          # örneğin 'WakeOnLanApp' klasörünün içindeyse, aşağıdaki satırın yorumunu kaldırın:
-          # cd WakeOnLanApp
-          
-          DEB_FILE=$(find packages -name "*.deb" | head -n 1)
-
-          if [ -z "$DEB_FILE" ]; then
-            echo "Hata: .deb dosyası bulunamadı. Derleme başarısız olmuş olabilir."
-            exit 1
-          fi
-
-          echo "Bulunan .deb dosyası: $DEB_FILE"
-
-          mkdir -p temp_extract
-          ar x "$DEB_FILE" -C temp_extract
-          tar -xf temp_extract/data.tar.xz -C extracted_ipa
-
-          APP_BUNDLE_PATH=$(find extracted_ipa/Applications -type d -name "*.app" | head -n 1)
-
-          if [ -z "$APP_BUNDLE_PATH" ]; then
-            echo "Hata: .app bundle'ı extracted_ipa/Applications içinde bulunamadı."
-            exit 1
-          fi
-
-          echo "Bulunan .app bundle: $APP_BUNDLE_PATH"
-
-          mkdir -p final_ipa/Payload
-          mv "$APP_BUNDLE_PATH" final_ipa/Payload/
-
-          zip -r "wakeonlanipa-${{ github.sha }}.ipa" final_ipa/*
-
-          echo "IPA dosyası oluşturuldu: wakeonlanipa-${{ github.sha }}.ipa"
-        shell: bash
-
-      - name: Derlenmiş IPA'yı Yayınla (Artifact Olarak Yükle)
-        uses: actions/upload-artifact@v4
-        with:
-          name: wakeonlanipa-IPA
-          path: wakeonlanipa-${{ github.sha }}.ipa
-          retention-days: 7
+          export THEOS="<span class="math-inline">\(pwd\)/theos"
