@@ -43,7 +43,7 @@ jobs:
           brew install dpkg
         shell: bash
 
-      - name: HATA AYIKLAMA: Theos Klasör İçeriğini Kontrol Et
+      - name: HATA AYIKLAMA:Theos Klasör İçeriğini Kontrol Et
         run: |
           echo "Theos klasörü içeriği (theos/):"
           ls -laR theos/
@@ -51,7 +51,7 @@ jobs:
           ls -la theos/makefiles/
         shell: bash
 
-      - name: HATA AYIKLAMA: Proje Makefile İçeriğini Kontrol Et
+      - name: HATA AYIKLAMA:Proje Makefile İçeriğini Kontrol Et
         run: |
           echo "Projenizin Makefile içeriği:"
           cat Makefile # Projenizin Makefile'ı deponun kökünde DEĞİLSE, yolu doğru ayarlayın.
